@@ -238,7 +238,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('Signup creates a user record', function(done) {
       var options = {
@@ -257,6 +257,7 @@ describe('', function() {
             if (res[0] && res[0]['username']) {
               var user = res[0]['username'];
             }
+            console.log('res: ', res);
             expect(user).to.equal('Svnh');
             done();
           }).catch(function(err) {

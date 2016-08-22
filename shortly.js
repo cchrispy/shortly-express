@@ -51,6 +51,7 @@ function(req, res) {
 
   new Link({ url: uri }).fetch().then(function(found) {
     if (found) {
+      console.log('FOUND: ', found);
       res.status(200).send(found.attributes);
     } else {
       util.getUrlTitle(uri, function(err, title) {
@@ -76,7 +77,16 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
-
+app.post('/signup', 
+  function(req, res) {
+    new User(req.body).save().then(function(data) {
+      // res.redirect(301, '/');
+      res.end();
+    }).catch(function(Err) {
+      console.log(Err);
+    });
+  }
+);
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
