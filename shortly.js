@@ -70,8 +70,18 @@ function(req, res) {
   }
 
   new Link({ url: uri }).fetch().then(function(found) {
+
     if (found) {
-      res.status(200).send(found.attributes);
+      db.knex('users').select('id').where('username', '=', req.session.username)
+      .then(function(data) {
+        // console.log('data: ', data[0].id);
+        // console.log('newLinkL ', newLink);
+        db.knex('users_urls').insert({'user_id': data[0].id, 'url_id': found.attributes.id})
+        .then(function() {
+          res.status(200).send(found.attributes);
+        });
+      });
+      
     } else {
       util.getUrlTitle(uri, function(err, title) {
         if (err) {
