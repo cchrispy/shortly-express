@@ -56,5 +56,16 @@ db.knex.schema.hasTable('users').then(function(exists) {
 
 // junction table for users and links later
 
+db.knex.schema.hasTable('users_urls').then(function(exists) {
+  if (!exists) {
+    db.knex.schema.createTable('users_urls', function (userLink) {
+      userLink.increments('id').primary();
+      userLink.integer('user_id');
+      userLink.integer('url_id');
+    }).then(function (table) {
+      console.log('Created Table', table);
+    });
+  }
+});
 
 module.exports = db;

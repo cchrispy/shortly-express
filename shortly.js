@@ -37,9 +37,24 @@ function(req, res) {
 
 app.get('/links', util.restrict, 
 function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
+  db.knex('users').select('id').where('username', '=', req.session.username).then(function(data) {
+    // console.log('user: ', new User(data[0]));
+    // console.log('fetch: ', new User(data[0]).fetch().then(function(data) {
+    //   console.log(data);
+    // }));
+    new User(data[0]).fetch({
+      withRelated: ['urls']
+    }).then(function(user) {
+      console.log('USER: ', user);
+      // console.log('USERS LINKS: ', user.related('urls'));
+      res.send(200, user.related('urls').fetch());
+    }).catch(function(err) {
+      console.log('error fetching: ', err);
+    });
+  // Links.reset().fetch().then(function(links) {
+  //   res.status(200).send(links.models);
   });
+  // });
 });
 
 app.post('/links', 
@@ -80,9 +95,10 @@ function(req, res) {
 
 app.post('/signup', 
   function(req, res) {
-    bcrypt.hash(req.body.password, null, null, function(hash) {
+    bcrypt.hash(req.body.password, null, null, function(err, hash) {
       req.session.password = hash;
       req.session.username = req.body.username;
+      console.log('body password: ', req.body.password);
       new User({username: req.body.username, password: hash}).save().then(function(data) {
       // req.session.password = this.password;
         res.redirect('/');
@@ -112,16 +128,15 @@ app.post('/login', function(req, res) {
     //   res.redirect('/');
     // } 
     if (req.body.password && data[0]) {
-      bcrypt.hash(req.body.password, null, null, function(err, hash) {
-        bcrypt.compare(req.body.password, hash, function(err, bool) {
-          if (bool) {
-            req.session.password = hash;
-            req.session.username = req.body.username;
-            res.redirect('/');
-          } else {
-            res.redirect('/login');
-          }
-        });
+      console.log(data[0]);
+      bcrypt.compare(req.body.password, data[0].password, function(err, bool) {
+        if (bool) {
+          req.session.password = data[0].password;
+          req.session.username = req.body.username;
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
       });
     } else {
       res.redirect('/login');
