@@ -45,9 +45,12 @@ function(req, res) {
     new User(data[0]).fetch({
       withRelated: ['urls']
     }).then(function(user) {
-      console.log('USER: ', user);
+      // console.log('USER: ', user);
       // console.log('USERS LINKS: ', user.related('urls'));
-      res.send(200, user.related('urls').fetch());
+      user.related('urls').fetch().then(function(data) {
+        // console.log('data on fetch: ', data);
+        res.send(200, data.models);
+      });
     }).catch(function(err) {
       console.log('error fetching: ', err);
     });
@@ -82,8 +85,19 @@ function(req, res) {
           baseUrl: req.headers.origin
         })
         .then(function(newLink) {
-          res.status(200).send(newLink);
+          db.knex('users').select('id').where('username', '=', req.session.username)
+          .then(function(data) {
+            // console.log('data: ', data[0].id);
+            // console.log('newLinkL ', newLink);
+            db.knex('users_urls').insert({'user_id': data[0].id, 'url_id': newLink.attributes.id})
+            .then(function() {
+              res.status(200).send(newLink);
+            });
+          });
         });
+        // .then(function(newLink) {
+        //   res.status(200).send(newLink);
+        // });
       });
     }
   });

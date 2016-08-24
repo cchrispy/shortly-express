@@ -10,7 +10,7 @@ var User = db.Model.extend({
   tableName: 'users',
   hasTimestamps: true,
   urls: function() {
-    return this.belongsToMany(Link, 'users_urls');
+    return this.belongsToMany(Link, 'users_urls', 'user_id', 'url_id');
   }
   // hashPW: function(password, cb) {
   //   bcrype.hash(password, null, null, function(err, hash) {
